@@ -8,16 +8,59 @@ output: html_document
 ```{r setup, include=FALSE}
 knitr::opts_chunk$set(echo = TRUE)
 ```
+#Pregunta 2
 
+Cargamos los precios de las acciones para Apple y Microsoft, mediante tidyquant:
+```{r message=FALSE, warning=FALSE}
+if(!require("pacman")) install.packages("pacman")
+library(tidyverse)
+library(tidyquant)
+library(ggthemes)
+
+APPLE = tq_get("AAPL",
+               get = "stock.prices",
+               from = "2000-01-01",
+               to = "2018-08-31",
+               periodicity = "monthly")
+
+MSFT = tq_get("MSFT",
+              get = "stock.prices",
+              from = "2000-01-01",
+              to = "2018-08-31",
+              periodicity = "monthly")
+```
+
+Para calcular el test Jarque-Bera:
+```{r}
+funcion_finanza<- function(x,norm) {
+  
+  if (norm=="yes") {
+    skew <- (sum((x - mean(x))^3)/length(x))/(sum((x - mean(x))^2)/length(x))^(3/2)
+    kur <- length(x) * sum((x - mean(x))^4)/(sum((x - mean(x))^2)^2)
+    jb <- (length(x)/6) * (skew^2 + 0.25 * ((kur - 3)^2))
+    pvalue <- 1 - pchisq(jb, df = 2)
+    if (pvalue<0.05) {
+      print("Se rechaza hipótesis nula de normalidad")
+    } else {
+      print("No se rechaza hipótesis nula de normalidad")
+    }
+  }
+}
+
+funcion_finanza(APPLE$close,"yes")
+
+funcion_finanza(MSFT$close, "yes")
+```
+
+
+
+
+#Pregunta 3
 ```{r message=FALSE, warning=FALSE}
 library(ggplot2)
 library(gridExtra)
 library(dplyr)
 ```
-
-
-#Pregunta 3
-
 
 *Pregunta a*
 Primero, calculamos la función que nos permitirá estimar el modelo:
@@ -267,5 +310,5 @@ grid.arrange(g11, g21, g31, g41, nrow=2, ncol=2)
 ```
 
 
-Donde gráficamente vemos que el valor se va concnetrando cada vez más a 2.5.
+Donde gráficamente vemos que el valor se va concentrando cada vez más a 2.5.
 
